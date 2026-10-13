@@ -12,11 +12,11 @@ using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configuración de llaves JWT (Ajuste para aceptar llaves cortas)
-var rawKey = builder.Configuration["Jwt:Key"] ?? "";
-var validKey = rawKey.PadRight(32, '0'); // Rellena con ceros hasta 32 caracteres si es muy corta
-var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-var jwtAudience = builder.Configuration["Jwt:Audience"];
+// 1. Configuración de llaves JWT (Ajuste para aceptar llaves seguras)
+var rawKey = builder.Configuration["Jwt:Key"] ?? "ClaveSecretaClinicaSuperSegura20261013ParaEvaluacionUT2";
+var validKey = rawKey.PadRight(32, '0');
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "ClinicaApi";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "ClinicaFrontend";
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -35,63 +35,86 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// 2. MITIGACIÓN OWASP: CORS (Control de orígenes)
+// 2. MITIGACIÓN OWASP API8: CORS restringido a orígenes explícitos configurados
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:5173", "https://localhost:5173", "http://localhost:3000", "https://localhost:7217" };
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendSeguro", policy =>
     {
-        policy.WithOrigins("https://localhost:7217") // Cambiar por la URL real de tu frontend
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
 
-// 3. MITIGACIÓN OWASP: Rate Limiting (Límite de recursos)
+// 3. MITIGACIÓN OWASP API4: Rate Limiting (Límite de recursos y prevención de ataques de fuerza bruta)
 builder.Services.AddRateLimiter(options =>
 {
+    // Límite general para endpoints de la API (100 peticiones / minuto)
     options.AddFixedWindowLimiter("LimiteBasico", opt =>
     {
         opt.Window = TimeSpan.FromMinutes(1);
-        opt.PermitLimit = 100; // Máximo 100 peticiones por minuto por IP
+        opt.PermitLimit = 100;
     });
+
+    // Límite estricto para Login (10 peticiones / minuto por IP para mitigar fuerza bruta)
+    options.AddFixedWindowLimiter("LoginLimiter", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 10;
+    });
+
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
-// 4. Agregamos servicios de OpenAPI/Scalar
+// 4. OpenAPI / Scalar para documentación de endpoints
 builder.Services.AddOpenApi();
 
 // 5. Inyección de Dependencias
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<IEvaluacionRepository, EvaluacionRepository>(); // Patrón Repository
+builder.Services.AddScoped<IEvaluacionRepository, EvaluacionRepository>();
 
-// 6. Inyectamos el DbContext con la cadena de conexión
+// 6. DbContext con la cadena de conexión de SQL Server
 builder.Services.AddDbContext<EvaluacionesClinicasDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("miconexion")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("miconexion")
+        ?? "Server=localhost\\SQLEXPRESS;Database=EvaluacionesClinicasDB;Trusted_Connection=True;TrustServerCertificate=True;"));
 
 var app = builder.Build();
 
-// 7. Activamos los Middlewares en el pipeline (El orden importa mucho)
+// 7. Pipeline de Middlewares (Orden crítico de ejecución)
 
-// Nuestro Middleware personalizado para medir tiempos (Requisito Arquitectura)
+// Mitigación OWASP API8: Manejo global de excepciones para no filtrar trazas ni secretos
+app.UseMiddleware<GlobalErrorHandlingMiddleware>();
+
+// Mitigación OWASP API8: Cabeceras HTTP de seguridad
+app.UseMiddleware<SecurityHeadersMiddleware>();
+
+// Middleware transversal para métricas de tiempo de respuesta
 app.UseMiddleware<RequestLoggingMiddleware>();
 
+// Redirección HTTPS
 app.UseHttpsRedirection();
 
-// Activamos mitigaciones OWASP
+// Activación de CORS restringido
 app.UseCors("FrontendSeguro");
+
+// Activación de Rate Limiting
 app.UseRateLimiter();
 
-// Seguridad
-app.UseAuthentication(); // Verifica "Quién eres" (Token)
-app.UseAuthorization();  // Verifica "Qué puedes hacer" (Roles)
+// Seguridad JWT y Roles
+app.UseAuthentication();
+app.UseAuthorization();
 
-// 8. Configuramos la interfaz gráfica para desarrollo (Scalar)
+// 8. Interfaz gráfica de documentación en desarrollo (Scalar)
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
 
-// 9. Mapeamos todos los Endpoints de la API
+// 9. Mapeo modular de Endpoints
 app.MapCategoriaApi();
 app.MapEvaluacionApi();
 app.MapPacienteApi();
@@ -99,4 +122,5 @@ app.MapSignoApi();
 app.MapUsuarioApi();
 
 app.Run();
+
 public partial class Program { }
