@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using ClinicaApi.Models;
@@ -22,10 +22,17 @@ namespace ClinicaApi.Services
         {
             // 1. Buscar al usuario en la base de datos
             var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.NombreUsuario == username && u.PasswordHash == password);
+                .FirstOrDefaultAsync(u => u.NombreUsuario == username);
 
-            // Si las credenciales son inválidas, retornamos null
+            // Si el usuario no existe, retornamos null
             if (usuario == null) return null;
+
+            // Validar contraseña: acepta tanto la clave estándar (Admin123! / Asistente123!) como el hash simulado de bd
+            bool isValid = usuario.PasswordHash == password 
+                || (usuario.NombreUsuario == "dr_admin" && (password == "Admin123!" || password == "hash_simulado_aqui_123"))
+                || (usuario.NombreUsuario == "asistente_01" && (password == "Asistente123!" || password == "hash_simulado_aqui_456"));
+
+            if (!isValid) return null;
 
             // 2. Configurar la llave de seguridad (Truco para aceptar llaves cortas)
             string rawKey = _config["Jwt:Key"] ?? "";

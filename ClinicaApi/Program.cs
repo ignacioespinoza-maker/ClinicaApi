@@ -112,6 +112,11 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
+    app.MapGet("/", () => Results.Redirect("/scalar/v1"));
+}
+else
+{
+    app.MapGet("/", () => Results.Ok(new { Mensaje = "ClinicaApi en ejecución", Documentacion = "/scalar/v1" }));
 }
 
 // 9. Mapeo modular de Endpoints

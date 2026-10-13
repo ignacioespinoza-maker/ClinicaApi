@@ -5,8 +5,8 @@ echo   Iniciando Sistema de Evaluaciones Clinicas
 echo ===================================================
 echo.
 
-echo [1/2] Iniciando Backend (.NET 10 API en http://localhost:5242)...
-start "Backend - ClinicaApi (.NET)" powershell -NoExit -Command "cd '%~dp0ClinicaApi'; Write-Host 'Iniciando Backend API en http://localhost:5242...' -ForegroundColor Cyan; dotnet run"
+echo [1/2] Iniciando Backend (.NET 10 API en http://localhost:5103)...
+start "Backend - ClinicaApi (.NET)" powershell -NoExit -Command "cd '%~dp0ClinicaApi'; Write-Host 'Iniciando Backend API en http://localhost:5103...' -ForegroundColor Cyan; Write-Host 'Documentacion interactiva: http://localhost:5103/scalar/v1' -ForegroundColor Yellow; dotnet run"
 
 timeout /t 3 /nobreak >nul
 
@@ -16,8 +16,8 @@ start "Frontend - Clinica Web (React)" powershell -NoExit -Command "$env:Path = 
 echo.
 echo ===================================================
 echo   Ambos servicios han sido lanzados en ventanas separadas!
-echo   - Backend:  http://localhost:5242/swagger
-echo   - Frontend: http://localhost:5173
+echo   - Documentacion API (Backend): http://localhost:5103/scalar/v1
+echo   - Aplicacion Web (Frontend):    http://localhost:5173
 echo ===================================================
 echo Puedes cerrar esta ventana.
 pause
