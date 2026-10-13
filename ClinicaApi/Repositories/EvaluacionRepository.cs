@@ -1,4 +1,4 @@
-﻿using ClinicaApi.Models;
+using ClinicaApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ClinicaApi.Repositories
@@ -7,7 +7,6 @@ namespace ClinicaApi.Repositories
     {
         private readonly EvaluacionesClinicasDbContext _context;
 
-        // Inyectamos el DbContext aquí, ya no en los endpoints
         public EvaluacionRepository(EvaluacionesClinicasDbContext context)
         {
             _context = context;
@@ -15,12 +14,22 @@ namespace ClinicaApi.Repositories
 
         public async Task<IEnumerable<Evaluacion>> GetAllAsync()
         {
-            return await _context.Evaluacions.ToListAsync();
+            return await _context.Evaluacions
+                .Include(e => e.IdPacienteNavigation)
+                .Include(e => e.IdSignoNavigation)
+                .Include(e => e.IdUsuarioNavigation)
+                .AsNoTracking()
+                .OrderByDescending(e => e.FechaEvaluacion)
+                .ToListAsync();
         }
 
         public async Task<Evaluacion?> GetByIdAsync(int id)
         {
-            return await _context.Evaluacions.FindAsync(id);
+            return await _context.Evaluacions
+                .Include(e => e.IdPacienteNavigation)
+                .Include(e => e.IdSignoNavigation)
+                .Include(e => e.IdUsuarioNavigation)
+                .FirstOrDefaultAsync(e => e.IdEvaluacion == id);
         }
 
         public async Task<Evaluacion> AddAsync(Evaluacion evaluacion)
