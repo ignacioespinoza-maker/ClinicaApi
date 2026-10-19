@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '../context/AuthContext';
 import { FeedbackAlert } from '../components/FeedbackAlert';
-import { Activity, Lock, User, LogIn, ShieldAlert } from 'lucide-react';
+import { Activity, Lock, User, LogIn, ShieldAlert, AlertCircle } from 'lucide-react';
 
 const loginSchema = z.object({
   nombreUsuario: z
@@ -48,9 +48,24 @@ export const LoginView: React.FC = () => {
       setErrorMessage(null);
       await login(data);
       navigate(fromLocation, { replace: true });
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Credenciales inválidas. Verifique sus datos.';
-      setErrorMessage(msg);
+    } catch (err: any) {
+      console.error('Error capturado en LoginView:', err);
+
+      // Manejo específico de respuestas HTTP y Axios
+      const status = err?.response?.status || err?.status;
+      const backendMessage = err?.response?.data?.message || err?.response?.data?.title;
+
+      if (status === 401) {
+        setErrorMessage('Credenciales inválidas. Verifique sus datos.');
+      } else if (status === 429) {
+        setErrorMessage('Ha superado el límite de intentos. Por favor espere un momento antes de volver a intentar.');
+      } else if (backendMessage) {
+        setErrorMessage(backendMessage);
+      } else if (err instanceof Error && err.message) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage('Credenciales inválidas. Verifique sus datos.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -76,14 +91,29 @@ export const LoginView: React.FC = () => {
           </p>
         </header>
 
+        {/* Mensaje de alerta accesible ante error 401 u otro */}
         {errorMessage && (
           <div className="mb-4">
-            <FeedbackAlert
-              type="error"
-              title="Error de autenticación"
-              message={errorMessage}
-              onClose={() => setErrorMessage(null)}
-            />
+            <div
+              role="alert"
+              aria-live="assertive"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                backgroundColor: '#fee2e2',
+                color: '#991b1b',
+                border: '1px solid #f87171',
+                padding: '12px 14px',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                fontSize: '0.95rem',
+                fontWeight: 500,
+              }}
+            >
+              <AlertCircle size={20} color="#dc2626" aria-hidden="true" />
+              <span>{errorMessage}</span>
+            </div>
           </div>
         )}
 

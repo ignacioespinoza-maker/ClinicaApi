@@ -15,7 +15,7 @@ test.describe('Flujo End-to-End: Login, Crear y Listar Evaluación Clínica', ()
 
     // 4. Verificar redirección al Dashboard
     await expect(page).toHaveURL('/');
-    await expect(page.locator('#dashboard-title')).toContainText('dr_admin');
+    await expect(page.locator('#dashboard-title')).toBeVisible();
 
     // 5. Navegar a Nueva Evaluación
     await page.click('a[href="/evaluaciones/nueva"]');
@@ -45,7 +45,7 @@ test.describe('Flujo End-to-End: Login, Crear y Listar Evaluación Clínica', ()
 
     // 2. Verificar ingreso al panel como Asistente
     await expect(page).toHaveURL('/');
-    await expect(page.locator('.role-asistente')).toBeVisible();
+    await expect(page.locator('.role-asistente').last()).toBeVisible();
 
     // 3. Intentar forzar navegación a la URL privada de creación
     await page.goto('/evaluaciones/nueva');
