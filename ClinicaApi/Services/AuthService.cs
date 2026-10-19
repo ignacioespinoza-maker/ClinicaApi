@@ -35,7 +35,7 @@ namespace ClinicaApi.Services
             if (!isValid) return null;
 
             // 2. Configurar la llave de seguridad (Truco para aceptar llaves cortas)
-            string rawKey = _config["Jwt:Key"] ?? "";
+            string rawKey = _config["Jwt:Key"] ?? "ClaveSecretaClinicaSuperSegura20261013ParaEvaluacionUT2";
             string validKey = rawKey.PadRight(32, '0'); // Rellena con ceros hasta alcanzar el tamaño requerido
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(validKey));
@@ -51,8 +51,8 @@ namespace ClinicaApi.Services
 
             // 4. Construir el Token JWT
             var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
+                issuer: _config["Jwt:Issuer"] ?? "ClinicaApi",
+                audience: _config["Jwt:Audience"] ?? "ClinicaFrontend",
                 claims: claims,
                 expires: DateTime.Now.AddMinutes(60), // Expira en 1 hora
                 signingCredentials: credentials);

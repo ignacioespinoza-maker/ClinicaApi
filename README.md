@@ -76,7 +76,7 @@ ClinicaApi_repo/
 ### Paso 1: Configurar la Base de Datos SQL Server
 1. Abre SQL Server Management Studio o ejecuta mediante `sqlcmd`:
    ```bash
-   sqlcmd -S "localhost\SQLEXPRESS" -E -i "ClinicaApi/clinica.sql"
+   sqlcmd -S ".\SQLEXPRESS" -E -i "ClinicaApi/clinica.sql"
    ```
 2. La base de datos `EvaluacionesClinicasDB` se creará con las tablas `Usuario`, `Paciente`, `CategoriaExamen`, `SignoClinico` y `Evaluacion`, junto con sus registros semilla.
 

@@ -16,7 +16,7 @@ export const removeStoredToken = (): void => {
 };
 
 // URL base tomada de variables de entorno (VITE_API_URL)
-const baseURL = import.meta.env.VITE_API_URL || 'https://localhost:7217';
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5103';
 
 export const apiClient = axios.create({
   baseURL,

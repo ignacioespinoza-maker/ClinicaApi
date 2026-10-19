@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,6 +29,8 @@ public partial class EvaluacionesClinicasDbContext : DbContext
     {
         modelBuilder.Entity<CategoriaExaman>(entity =>
         {
+            entity.ToTable("CategoriaExamen");
+
             entity.HasKey(e => e.IdCategoria);
 
             entity.Property(e => e.IdCategoria).HasColumnName("id_categoria");

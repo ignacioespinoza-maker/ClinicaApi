@@ -79,7 +79,7 @@ builder.Services.AddScoped<IEvaluacionRepository, EvaluacionRepository>();
 // 6. DbContext con la cadena de conexión de SQL Server
 builder.Services.AddDbContext<EvaluacionesClinicasDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("miconexion")
-        ?? "Server=localhost\\SQLEXPRESS;Database=EvaluacionesClinicasDB;Trusted_Connection=True;TrustServerCertificate=True;"));
+        ?? "Server=.\\SQLEXPRESS;Database=EvaluacionesClinicasDB;Trusted_Connection=True;TrustServerCertificate=True;"));
 
 var app = builder.Build();
 
