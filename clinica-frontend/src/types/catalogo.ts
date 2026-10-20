@@ -11,3 +11,14 @@ export interface SignoClinico {
   categoria?: string;
   idCategoria?: number;
 }
+
+export interface CrearCategoriaRequest {
+  nombre: string;
+  descripcion?: string | null;
+}
+
+export interface CrearSignoRequest {
+  nombre: string;
+  descripcion?: string | null;
+  idCategoria: number;
+}

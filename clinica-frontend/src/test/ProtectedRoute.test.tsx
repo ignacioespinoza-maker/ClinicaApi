@@ -81,4 +81,55 @@ describe('ProtectedRoute Component Tests', () => {
     expect(screen.getByText('Formulario Especialista')).toBeInTheDocument();
     expect(screen.queryByText('Página 403 Acceso Denegado')).not.toBeInTheDocument();
   });
+
+  it('bloquea el acceso a usuarios no-admin en rutas con requireAdmin', () => {
+    // Usuario Doctor pero NO admin (ej: dr_carlos)
+    vi.spyOn(authService, 'getCurrentUser').mockReturnValue({
+      idUsuario: 5,
+      nombreUsuario: 'dr_carlos',
+      rol: 'Especialista',
+    });
+    vi.spyOn(authService, 'getToken').mockReturnValue('mock_token');
+
+    render(
+      <MemoryRouter initialEntries={['/usuarios']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/acceso-denegado" element={<div>Página 403 Acceso Denegado</div>} />
+            <Route element={<ProtectedRoute requireAdmin />}>
+              <Route path="/usuarios" element={<div>Panel Exclusivo Admin</div>} />
+            </Route>
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Página 403 Acceso Denegado')).toBeInTheDocument();
+    expect(screen.queryByText('Panel Exclusivo Admin')).not.toBeInTheDocument();
+  });
+
+  it('permite el acceso a la ruta con requireAdmin cuando el usuario es dr_admin', () => {
+    vi.spyOn(authService, 'getCurrentUser').mockReturnValue({
+      idUsuario: 1,
+      nombreUsuario: 'dr_admin',
+      rol: 'Especialista',
+    });
+    vi.spyOn(authService, 'getToken').mockReturnValue('mock_token');
+
+    render(
+      <MemoryRouter initialEntries={['/usuarios']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/acceso-denegado" element={<div>Página 403 Acceso Denegado</div>} />
+            <Route element={<ProtectedRoute requireAdmin />}>
+              <Route path="/usuarios" element={<div>Panel Exclusivo Admin</div>} />
+            </Route>
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Panel Exclusivo Admin')).toBeInTheDocument();
+    expect(screen.queryByText('Página 403 Acceso Denegado')).not.toBeInTheDocument();
+  });
 });

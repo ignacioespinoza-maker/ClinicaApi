@@ -27,10 +27,11 @@ namespace ClinicaApi.Services
             // Si el usuario no existe, retornamos null
             if (usuario == null) return null;
 
-            // Validar contraseña: acepta tanto la clave estándar (Admin123! / Asistente123!) como el hash simulado de bd
+            // Validar contraseña: acepta tanto la clave estándar como el hash simulado de bd
             bool isValid = usuario.PasswordHash == password 
                 || (usuario.NombreUsuario == "dr_admin" && (password == "Admin123!" || password == "hash_simulado_aqui_123"))
-                || (usuario.NombreUsuario == "asistente_01" && (password == "Asistente123!" || password == "hash_simulado_aqui_456"));
+                || (usuario.NombreUsuario == "asistente_01" && (password == "Asistente123!" || password == "hash_simulado_aqui_456"))
+                || (usuario.NombreUsuario == "asistente_admin" && (password == "AsistenteAdmin123!" || password == "hash_simulado_asistente_admin"));
 
             if (!isValid) return null;
 
@@ -42,11 +43,16 @@ namespace ClinicaApi.Services
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             // 3. Crear los "Claims" (Datos dentro del token)
+            // Determinamos si tiene credencial de Administrador (ej: dr_admin, asistente_admin o rol Admin)
+            bool esAdmin = usuario.NombreUsuario.Contains("admin", StringComparison.OrdinalIgnoreCase) 
+                        || usuario.Rol.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
                 new Claim(ClaimTypes.Name, usuario.NombreUsuario),
-                new Claim(ClaimTypes.Role, usuario.Rol) // Asignamos el rol: Especialista o Asistente
+                new Claim(ClaimTypes.Role, usuario.Rol), // Rol clínico: Especialista o Asistente
+                new Claim("IsAdmin", esAdmin ? "true" : "false") // Credencial de Administrador
             };
 
             // 4. Construir el Token JWT

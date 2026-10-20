@@ -56,10 +56,14 @@ ClinicaApi_repo/
 
 ## 3. Cuentas de Demostración y Roles del Sistema
 
-| Usuario | Contraseña | Rol Asignado | Privilegios en el Sistema |
-| :--- | :--- | :--- | :--- |
-| `dr_admin` | `hash_simulado_aqui_123` | **Especialista** | Acceso pleno: Consultar, crear, editar y eliminar evaluaciones clínicas, ver detalle y registrar pacientes. |
-| `asistente_01` | `hash_simulado_aqui_456` | **Asistente** | Acceso restringido: Consultar evaluaciones y catálogo clínico, registrar pacientes. Las acciones de modificación y creación de diagnósticos están bloqueadas (403). |
+| Usuario | Contraseña | Rol Clínico | Credencial Admin | Privilegios en el Sistema |
+| :--- | :--- | :--- | :---: | :--- |
+| `dr_admin` | `hash_simulado_aqui_123` | **Especialista** | **Sí** | Acceso pleno: Crear y eliminar usuarios (Doctores y Asistentes) + CRUD de evaluaciones clínicas + Pacientes y Catálogos. |
+| `asistente_admin` | `hash_simulado_asistente_admin` | **Asistente** | **Sí** | Acceso administrativo: Crear y eliminar usuarios (Doctores y Asistentes) + Pacientes y Catálogos. Evaluaciones en solo lectura. |
+| `asistente_01` | `hash_simulado_aqui_456` | **Asistente** | No | Acceso estándar: Consultar evaluaciones y catálogo clínico, registrar pacientes. Gestión de usuarios bloqueada (403). |
+
+> [!NOTE]
+> Para consultar el detalle exhaustivo del modelo de datos, la matriz de seguridad BFLA y los resultados de las pruebas, consulte el documento [INFORME_TECNICO.md](INFORME_TECNICO.md).
 
 ---
 
@@ -74,9 +78,9 @@ ClinicaApi_repo/
 ## 5. Instrucciones de Instalación y Ejecución
 
 ### Paso 1: Configurar la Base de Datos SQL Server
-1. Abre SQL Server Management Studio o ejecuta mediante `sqlcmd`:
+1. Abre SQL Server Management Studio o ejecuta el script [clinica.sql](clinica.sql) mediante `sqlcmd`:
    ```bash
-   sqlcmd -S ".\SQLEXPRESS" -E -i "ClinicaApi/clinica.sql"
+   sqlcmd -S ".\SQLEXPRESS" -E -i "clinica.sql"
    ```
 2. La base de datos `EvaluacionesClinicasDB` se creará con las tablas `Usuario`, `Paciente`, `CategoriaExamen`, `SignoClinico` y `Evaluacion`, junto con sus registros semilla.
 

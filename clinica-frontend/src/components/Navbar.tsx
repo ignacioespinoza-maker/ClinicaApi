@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Activity, LogOut, Menu, X, Users, ClipboardList, LayoutDashboard } from 'lucide-react';
+import {
+  Activity,
+  LogOut,
+  Menu,
+  X,
+  Users,
+  ClipboardList,
+  LayoutDashboard,
+  Layers,
+  UserCheck,
+} from 'lucide-react';
 
 export const Navbar: React.FC = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -82,6 +92,28 @@ export const Navbar: React.FC = () => {
                 <span>Pacientes</span>
               </NavLink>
             </li>
+            <li>
+              <NavLink
+                to="/catalogos"
+                className={({ isActive }) => `nav-link min-touch ${isActive ? 'nav-link-active' : ''}`}
+                onClick={closeMobileMenu}
+              >
+                <Layers size={18} aria-hidden="true" />
+                <span>Catálogos</span>
+              </NavLink>
+            </li>
+            {isAdmin && (
+              <li>
+                <NavLink
+                  to="/usuarios"
+                  className={({ isActive }) => `nav-link min-touch ${isActive ? 'nav-link-active' : ''}`}
+                  onClick={closeMobileMenu}
+                >
+                  <UserCheck size={18} aria-hidden="true" />
+                  <span>Usuarios</span>
+                </NavLink>
+              </li>
+            )}
           </ul>
 
           <div className="nav-user-panel">
@@ -98,7 +130,7 @@ export const Navbar: React.FC = () => {
               aria-label="Cerrar sesión de usuario"
             >
               <LogOut size={16} aria-hidden="true" />
-              <span className="logout-text">Salir</span>
+              <span>Salir</span>
             </button>
           </div>
         </nav>

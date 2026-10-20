@@ -13,18 +13,22 @@ import {
   ShieldCheck,
   CheckCircle,
   Lock,
+  Layers,
+  UserCheck,
 } from 'lucide-react';
 
 export const DashboardView: React.FC = () => {
-  const { user, isEspecialista } = useAuth();
+  const { user, isEspecialista, isAdmin } = useAuth();
   const [stats, setStats] = useState<{
     evaluacionesCount: number;
     pacientesCount: number;
     signosCount: number;
+    categoriasCount: number;
   }>({
     evaluacionesCount: 0,
     pacientesCount: 0,
     signosCount: 0,
+    categoriasCount: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,16 +36,18 @@ export const DashboardView: React.FC = () => {
     let isMounted = true;
     const fetchDashboardData = async () => {
       try {
-        const [evals, pacs, signs] = await Promise.all([
+        const [evals, pacs, signs, cats] = await Promise.all([
           evaluacionService.getAll().catch(() => []),
           pacienteService.getAll().catch(() => []),
           catalogoService.getSignos().catch(() => []),
+          catalogoService.getCategorias().catch(() => []),
         ]);
         if (isMounted) {
           setStats({
             evaluacionesCount: evals.length,
             pacientesCount: pacs.length,
             signosCount: signs.length,
+            categoriasCount: cats.length,
           });
         }
       } finally {
@@ -66,7 +72,7 @@ export const DashboardView: React.FC = () => {
           <p className="hero-subtext">
             Panel de control clínico. Sesión activa con rol:{' '}
             <strong className={`role-badge role-${user?.rol.toLowerCase()}`}>
-              {user?.rol}
+              {user?.rol === 'Especialista' ? 'Doctor Especialista' : 'Asistente'}
             </strong>
           </p>
         </div>
@@ -77,9 +83,15 @@ export const DashboardView: React.FC = () => {
               <span>Nueva Evaluación</span>
             </Link>
           )}
-          <Link to="/evaluaciones" className="btn btn-secondary min-touch">
-            <ClipboardList size={18} aria-hidden="true" />
-            <span>Ver Evaluaciones</span>
+          {isAdmin && (
+            <Link to="/usuarios" className="btn btn-outline-primary min-touch">
+              <UserCheck size={18} aria-hidden="true" />
+              <span>Gestión Doctores / Usuarios</span>
+            </Link>
+          )}
+          <Link to="/catalogos" className="btn btn-secondary min-touch">
+            <Layers size={18} aria-hidden="true" />
+            <span>Catálogos Clínicos</span>
           </Link>
         </div>
       </section>
@@ -118,6 +130,16 @@ export const DashboardView: React.FC = () => {
               <span className="stat-label">Pruebas y Signos Clínicos</span>
             </div>
           </div>
+
+          <div className="stat-card">
+            <div className="stat-icon-box bg-blue" aria-hidden="true" style={{ backgroundColor: '#f0fdf4', color: '#16a34a' }}>
+              <Layers size={26} />
+            </div>
+            <div className="stat-info">
+              <span className="stat-value">{stats.categoriasCount}</span>
+              <span className="stat-label">Categorías de Examen</span>
+            </div>
+          </div>
         </section>
       )}
 
@@ -125,19 +147,19 @@ export const DashboardView: React.FC = () => {
       <section className="role-capabilities-section" aria-labelledby="role-caps-title">
         <h2 id="role-caps-title" className="section-title">
           <ShieldCheck size={22} className="text-primary inline-icon" aria-hidden="true" />
-          <span>Matriz de Autorización y Seguridad Activa</span>
+          <span>Matriz de Autorización y Capacidades Clínicas</span>
         </h2>
         <div className="capabilities-grid">
           <div className="capability-card">
-            <h3 className="card-subtitle">Permisos según su Rol Actual ({user?.rol})</h3>
+            <h3 className="card-subtitle">Permisos según su Rol ({user?.rol})</h3>
             <ul className="capability-list">
               <li className="cap-item">
                 <CheckCircle size={18} className="text-success" aria-hidden="true" />
-                <span>Listar y consultar evaluaciones clínicas</span>
+                <span>Listar y consultar evaluaciones médicas y pacientes</span>
               </li>
               <li className="cap-item">
                 <CheckCircle size={18} className="text-success" aria-hidden="true" />
-                <span>Consultar catálogo de pacientes y signos clínicos</span>
+                <span><strong>Crear Categorías de Examen y Signos Clínicos</strong> (Asistente y Doctor)</span>
               </li>
               <li className="cap-item">
                 <CheckCircle size={18} className="text-success" aria-hidden="true" />
@@ -147,12 +169,25 @@ export const DashboardView: React.FC = () => {
                 {isEspecialista ? (
                   <>
                     <CheckCircle size={18} className="text-success" aria-hidden="true" />
-                    <span><strong>Crear, editar y eliminar evaluaciones clínicas</strong></span>
+                    <span><strong>Crear, editar y eliminar evaluaciones</strong> (Doctor Especialista)</span>
                   </>
                 ) : (
                   <>
                     <Lock size={18} className="text-danger" aria-hidden="true" />
                     <span className="text-muted">Crear y modificar evaluaciones (Exclusivo Especialista)</span>
+                  </>
+                )}
+              </li>
+              <li className="cap-item">
+                {isAdmin ? (
+                  <>
+                    <CheckCircle size={18} className="text-success" aria-hidden="true" />
+                    <span><strong>Crear y eliminar otros Doctores y Asistentes</strong> (Credencial Administrador)</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock size={18} className="text-danger" aria-hidden="true" />
+                    <span className="text-muted">Crear y eliminar usuarios (Exclusivo Doctor Admin y Asistente Admin)</span>
                   </>
                 )}
               </li>
@@ -168,15 +203,15 @@ export const DashboardView: React.FC = () => {
               </li>
               <li className="cap-item">
                 <span className="badge-owasp">API5</span>
-                <span>Autorización a nivel función: rutas privadas y validación backend (403)</span>
+                <span>Autorización BFLA: bloqueo de rutas privadas y validación backend (403)</span>
               </li>
               <li className="cap-item">
                 <span className="badge-owasp">API4</span>
-                <span>Rate Limiting por IP para prevenir ataques de fuerza bruta</span>
+                <span>Rate Limiting por IP para mitigar ataques de fuerza bruta</span>
               </li>
               <li className="cap-item">
                 <span className="badge-owasp">API8</span>
-                <span>CORS restringido a orígenes explícitos y cabeceras HTTP de seguridad</span>
+                <span>CORS restringido a orígenes explícitos y cabeceras de seguridad HTTP</span>
               </li>
             </ul>
           </div>

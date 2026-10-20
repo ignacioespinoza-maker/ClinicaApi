@@ -126,6 +126,26 @@ app.MapPacienteApi();
 app.MapSignoApi();
 app.MapUsuarioApi();
 
+// Semilla automática para Asistente con Credencial de Administrador
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<EvaluacionesClinicasDbContext>();
+        if (!db.Usuarios.Any(u => u.NombreUsuario == "asistente_admin"))
+        {
+            db.Usuarios.Add(new Usuario
+            {
+                NombreUsuario = "asistente_admin",
+                PasswordHash = "hash_simulado_asistente_admin",
+                Rol = "Asistente"
+            });
+            db.SaveChanges();
+        }
+    }
+    catch { /* Silencioso en caso de inicialización en pruebas */ }
+}
+
 app.Run();
 
 public partial class Program { }

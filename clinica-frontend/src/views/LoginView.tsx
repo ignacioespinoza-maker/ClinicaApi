@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '../context/AuthContext';
-import { FeedbackAlert } from '../components/FeedbackAlert';
 import { Activity, Lock, User, LogIn, ShieldAlert, AlertCircle } from 'lucide-react';
 
 const loginSchema = z.object({
@@ -23,12 +22,14 @@ export const LoginView: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirigir a la ruta original si existía
   const fromLocation = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
 
+  // Formulario Login
   const {
     register,
     handleSubmit,
@@ -51,9 +52,8 @@ export const LoginView: React.FC = () => {
     } catch (err: any) {
       console.error('Error capturado en LoginView:', err);
 
-      // Manejo específico de respuestas HTTP y Axios
       const status = err?.response?.status || err?.status;
-      const backendMessage = err?.response?.data?.message || err?.response?.data?.title;
+      const backendMessage = err?.response?.data?.error || err?.response?.data?.message || err?.response?.data?.title;
 
       if (status === 401) {
         setErrorMessage('Credenciales inválidas. Verifique sus datos.');
@@ -91,7 +91,7 @@ export const LoginView: React.FC = () => {
           </p>
         </header>
 
-        {/* Mensaje de alerta accesible ante error 401 u otro */}
+        {/* Mensaje de alerta accesible ante error */}
         {errorMessage && (
           <div className="mb-4">
             <div
@@ -117,8 +117,8 @@ export const LoginView: React.FC = () => {
           </div>
         )}
 
+        {/* FORMULARIO LOGIN */}
         <form onSubmit={handleSubmit(onSubmit)} className="login-form" noValidate>
-          {/* Campo Nombre de Usuario */}
           <div className="form-group">
             <label htmlFor="nombreUsuario" className="form-label">
               Nombre de Usuario
@@ -144,7 +144,6 @@ export const LoginView: React.FC = () => {
             )}
           </div>
 
-          {/* Campo Contraseña */}
           <div className="form-group">
             <label htmlFor="password" className="form-label">
               Contraseña
@@ -170,7 +169,6 @@ export const LoginView: React.FC = () => {
             )}
           </div>
 
-          {/* Botón Submit */}
           <button
             type="submit"
             disabled={isSubmitting}
@@ -202,14 +200,21 @@ export const LoginView: React.FC = () => {
               className="btn btn-sm btn-outline-primary min-touch"
               onClick={() => fillCredentials('dr_admin', 'hash_simulado_aqui_123')}
             >
-              Dr. Admin (Especialista)
+              Dr. Admin (Doctor con Admin)
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-primary min-touch"
+              onClick={() => fillCredentials('asistente_admin', 'hash_simulado_asistente_admin')}
+            >
+              Asistente Admin (Asistente con Admin)
             </button>
             <button
               type="button"
               className="btn btn-sm btn-outline-secondary min-touch"
               onClick={() => fillCredentials('asistente_01', 'hash_simulado_aqui_456')}
             >
-              Asistente 01 (Asistente)
+              Asistente 01 (Asistente Estándar)
             </button>
           </div>
         </section>

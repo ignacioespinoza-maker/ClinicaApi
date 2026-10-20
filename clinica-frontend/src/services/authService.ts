@@ -1,5 +1,5 @@
 import { apiClient, getStoredToken, setStoredToken, removeStoredToken } from './apiClient';
-import type { AuthUser, LoginRequest, LoginResponse, UserRole } from '../types/auth';
+import type { AuthUser, LoginRequest, LoginResponse, UserRole, CrearUsuarioRequest } from '../types/auth';
 
 interface JwtPayload {
   nameid?: string;
@@ -8,6 +8,7 @@ interface JwtPayload {
   name?: string;
   role?: string;
   'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'?: string;
+  IsAdmin?: string;
   exp?: number;
 }
 
@@ -73,10 +74,17 @@ export const authService = {
     const roleClaim = payload.role || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
     const rol: UserRole = roleClaim === 'Especialista' ? 'Especialista' : 'Asistente';
 
+    const isAdminClaim =
+      payload.IsAdmin === 'true' ||
+      nombreUsuario.toLowerCase() === 'dr_admin' ||
+      nombreUsuario.toLowerCase() === 'asistente_admin' ||
+      nombreUsuario.toLowerCase().includes('admin');
+
     return {
       idUsuario,
       nombreUsuario,
       rol,
+      isAdmin: isAdminClaim,
     };
   },
 
@@ -86,5 +94,29 @@ export const authService = {
 
   isAuthenticated(): boolean {
     return this.getCurrentUser() !== null;
+  },
+
+  // Registro público para crear nuevo Asistente o Doctor
+  async registro(data: CrearUsuarioRequest): Promise<AuthUser> {
+    const response = await apiClient.post<AuthUser>('/api/v1/usuarios/registro', data);
+    return response.data;
+  },
+
+  // Obtener lista de usuarios (Doctor / Asistente con credencial Admin)
+  async getUsuarios(): Promise<AuthUser[]> {
+    const response = await apiClient.get<AuthUser[]>('/api/v1/usuarios');
+    return response.data;
+  },
+
+  // Creación de usuario por parte de usuario con credencial Admin
+  async createUsuario(data: CrearUsuarioRequest): Promise<AuthUser> {
+    const response = await apiClient.post<AuthUser>('/api/v1/usuarios', data);
+    return response.data;
+  },
+
+  // Eliminación de usuario por parte de usuario con credencial Admin
+  async deleteUsuario(id: number): Promise<{ mensaje: string }> {
+    const response = await apiClient.delete<{ mensaje: string }>(`/api/v1/usuarios/${id}`);
+    return response.data;
   },
 };

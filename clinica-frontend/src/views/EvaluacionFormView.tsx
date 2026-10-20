@@ -13,7 +13,6 @@ import type { SignoClinico } from '../types/catalogo';
 import {
   ArrowLeft,
   Save,
-  Activity,
   User,
   Stethoscope,
   FileCheck,

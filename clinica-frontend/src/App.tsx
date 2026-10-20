@@ -10,6 +10,8 @@ import { EvaluacionesListView } from './views/EvaluacionesListView';
 import { EvaluacionDetailView } from './views/EvaluacionDetailView';
 import { EvaluacionFormView } from './views/EvaluacionFormView';
 import { PacientesView } from './views/PacientesView';
+import { CatalogosView } from './views/CatalogosView';
+import { UsuariosView } from './views/UsuariosView';
 import { AccessDeniedView } from './views/AccessDeniedView';
 import { NotFoundView } from './views/NotFoundView';
 
@@ -47,13 +49,19 @@ export const AppContent: React.FC = () => {
             <Route path="/evaluaciones" element={<EvaluacionesListView />} />
             <Route path="/evaluaciones/:id" element={<EvaluacionDetailView />} />
             <Route path="/pacientes" element={<PacientesView />} />
+            <Route path="/catalogos" element={<CatalogosView />} />
             <Route path="/acceso-denegado" element={<AccessDeniedView />} />
           </Route>
 
-          {/* Rutas Protegidas EXCLUSIVAS para Especialista */}
+          {/* Rutas Protegidas EXCLUSIVAS para Doctor Especialista (Crear y Editar Evaluaciones Clínicas) */}
           <Route element={<ProtectedRoute allowedRoles={['Especialista']} />}>
             <Route path="/evaluaciones/nueva" element={<EvaluacionFormView />} />
             <Route path="/evaluaciones/:id/editar" element={<EvaluacionFormView />} />
+          </Route>
+
+          {/* Ruta Protegida EXCLUSIVA para Administradores (Doctor Admin y Asistente Admin) */}
+          <Route element={<ProtectedRoute requireAdmin />}>
+            <Route path="/usuarios" element={<UsuariosView />} />
           </Route>
 
           {/* Ruta 404 */}

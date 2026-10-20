@@ -4,6 +4,7 @@ export interface AuthUser {
   idUsuario: number;
   nombreUsuario: string;
   rol: UserRole;
+  isAdmin?: boolean;
 }
 
 export interface LoginRequest {
@@ -14,4 +15,10 @@ export interface LoginRequest {
 export interface LoginResponse {
   token: string;
   Token?: string;
+}
+
+export interface CrearUsuarioRequest {
+  nombreUsuario: string;
+  password: string;
+  rol: UserRole;
 }

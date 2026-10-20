@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { pacienteService } from '../services/pacienteService';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { FeedbackAlert } from '../components/FeedbackAlert';
+import { validarRutChileno, formatearRutChileno } from '../utils/rutValidator';
 import type { Paciente } from '../types/paciente';
 import {
   Users,
@@ -20,22 +21,38 @@ import {
 const pacienteSchema = z.object({
   rut: z
     .string()
-    .min(8, 'El RUT debe tener al menos 8 caracteres (ej: 12345678-9)')
-    .max(12, 'El RUT no puede superar 12 caracteres'),
+    .min(1, 'El RUT es obligatorio')
+    .refine((val) => validarRutChileno(val), {
+      message: 'El RUT ingresado no es válido. Verifique el formato y dígito verificador (ej: 12345678-5 o 12.345.678-5).',
+    }),
   nombre: z
     .string()
+    .trim()
     .min(2, 'El nombre debe tener al menos 2 caracteres')
-    .max(100, 'El nombre no puede exceder 100 caracteres'),
+    .max(100, 'El nombre no puede exceder 100 caracteres')
+    .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/, 'El nombre solo puede contener letras y espacios'),
   apellidos: z
     .string()
+    .trim()
     .min(2, 'Los apellidos deben tener al menos 2 caracteres')
-    .max(150, 'Los apellidos no pueden exceder 150 caracteres'),
+    .max(150, 'Los apellidos no pueden exceder 150 caracteres')
+    .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/, 'Los apellidos solo pueden contener letras y espacios'),
   fechaNacimiento: z
     .string()
-    .min(1, 'La fecha de nacimiento es obligatoria'),
+    .min(1, 'La fecha de nacimiento es obligatoria')
+    .refine((val) => {
+      const fecha = new Date(val);
+      const hoy = new Date();
+      return fecha <= hoy;
+    }, {
+      message: 'La fecha de nacimiento no puede ser una fecha futura',
+    }),
   telefono: z
     .string()
-    .optional(),
+    .optional()
+    .refine((val) => !val || /^[0-9+-\s]{8,15}$/.test(val.trim()), {
+      message: 'El teléfono debe tener un formato válido (ej: +56912345678 o 912345678)',
+    }),
 });
 
 type PacienteFormData = z.infer<typeof pacienteSchema>;
@@ -95,7 +112,7 @@ export const PacientesView: React.FC = () => {
     try {
       setIsSubmitting(true);
       const nuevo = await pacienteService.create({
-        rut: data.rut.trim(),
+        rut: formatearRutChileno(data.rut),
         nombre: data.nombre.trim(),
         apellidos: data.apellidos.trim(),
         fechaNacimiento: data.fechaNacimiento,

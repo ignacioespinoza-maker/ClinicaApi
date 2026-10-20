@@ -6,6 +6,7 @@ interface AuthContextType {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   isEspecialista: boolean;
   isAsistente: boolean;
   isLoading: boolean;
@@ -63,10 +64,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
   };
 
+  const isAdmin = !!user && (
+    user.isAdmin === true ||
+    user.nombreUsuario.toLowerCase() === 'dr_admin' ||
+    user.nombreUsuario.toLowerCase() === 'asistente_admin' ||
+    user.nombreUsuario.toLowerCase().includes('admin') ||
+    user.rol.toLowerCase() === 'admin' ||
+    user.rol.toLowerCase() === 'administrador'
+  );
+
   const value: AuthContextType = {
     user,
     token,
     isAuthenticated: !!user,
+    isAdmin,
     isEspecialista: user?.rol === 'Especialista',
     isAsistente: user?.rol === 'Asistente',
     isLoading,
