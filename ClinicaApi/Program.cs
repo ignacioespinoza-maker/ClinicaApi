@@ -12,9 +12,15 @@ using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configuración de llaves JWT (Ajuste para aceptar llaves seguras)
-var rawKey = builder.Configuration["Jwt:Key"] ?? "ClaveSecretaClinicaSuperSegura20261013ParaEvaluacionUT2";
-var validKey = rawKey.PadRight(32, '0');
+// 1. Configuración de llaves JWT
+var rawKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Falta configurar Jwt:Key mediante User Secrets o una variable de entorno.");
+var keyBytes = Encoding.UTF8.GetBytes(rawKey);
+if (keyBytes.Length < 32)
+{
+    throw new InvalidOperationException("Jwt:Key debe tener al menos 32 bytes.");
+}
+
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "ClinicaApi";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "ClinicaFrontend";
 
@@ -29,7 +35,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(validKey))
+            IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
         };
     });
 

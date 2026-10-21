@@ -11,11 +11,10 @@ import type { Paciente } from '../types/paciente';
 const mockPacientes: Paciente[] = [
   {
     idPaciente: 1,
-    rut: '11111111-1',
-    nombre: 'Carlos',
-    apellidos: 'Méndez Rojas',
-    fechaNacimiento: '1985-05-14',
-    telefono: '+56912345678',
+    rut: '00000000-0',
+    nombre: 'Paciente',
+    apellidos: 'Demo 001',
+    fechaNacimiento: '1990-01-01',
   },
 ];
 
@@ -42,8 +41,8 @@ describe('PacientesView Component Tests', () => {
       </MemoryRouter>
     );
 
-    expect(await screen.findByText('Carlos Méndez Rojas')).toBeInTheDocument();
-    expect(screen.getByText('11111111-1')).toBeInTheDocument();
+    expect(await screen.findByText('Paciente Demo 001')).toBeInTheDocument();
+    expect(screen.getByText('00000000-0')).toBeInTheDocument();
   });
 
   it('muestra mensaje de error si se ingresa un RUT con dígito verificador inválido', async () => {
@@ -57,7 +56,7 @@ describe('PacientesView Component Tests', () => {
       </MemoryRouter>
     );
 
-    await screen.findByText('Carlos Méndez Rojas');
+    await screen.findByText('Paciente Demo 001');
 
     // Abrir modal
     const btnNuevo = screen.getByRole('button', { name: /registrar paciente/i });
@@ -103,7 +102,7 @@ describe('PacientesView Component Tests', () => {
       </MemoryRouter>
     );
 
-    await screen.findByText('Carlos Méndez Rojas');
+    await screen.findByText('Paciente Demo 001');
 
     // Abrir modal
     const btnNuevo = screen.getByRole('button', { name: /registrar paciente/i });
@@ -131,4 +130,3 @@ describe('PacientesView Component Tests', () => {
     expect(await screen.findByText(/registrado exitosamente/i)).toBeInTheDocument();
   });
 });
-

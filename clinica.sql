@@ -28,15 +28,23 @@ GO
 -- TABLA 1: [dbo].[Usuario]
 -- DESCRIPCIÓN: Almacena los profesionales clínicos y administrativos del sistema.
 -- ROLES CLÍNICOS: 'Especialista' (Doctor facultado para evaluaciones) y 'Asistente' (Personal de apoyo).
--- CREDENCIAL ADMIN: Otorgada por convención de nombre o claim a 'dr_admin' y 'asistente_admin'.
+-- CREDENCIAL ADMIN: Columna explícita [es_admin] (1 = Administrador facultado, 0 = Estándar).
+-- AUDITORÍA Y CONTACTO: [nombre_completo], [email], [activo] (borrado lógico), [fecha_creacion], [ultimo_acceso].
 -- =========================================================================================
 CREATE TABLE [dbo].[Usuario](
     [id_usuario] [int] IDENTITY(1,1) NOT NULL,
     [nombre_usuario] [varchar](100) NOT NULL,
     [password_hash] [varchar](255) NOT NULL,
     [rol] [varchar](20) NOT NULL DEFAULT ('Asistente'),
+    [es_admin] [bit] NOT NULL DEFAULT (0),
+    [nombre_completo] [varchar](150) NULL,
+    [email] [varchar](150) NULL,
+    [activo] [bit] NOT NULL DEFAULT (1),
+    [fecha_creacion] [datetime2] NOT NULL DEFAULT (GETDATE()),
+    [ultimo_acceso] [datetime2] NULL,
     CONSTRAINT [PK_Usuario] PRIMARY KEY CLUSTERED ([id_usuario] ASC),
     CONSTRAINT [UQ_Usuario_Nombre] UNIQUE NONCLUSTERED ([nombre_usuario] ASC),
+    CONSTRAINT [UQ_Usuario_Email] UNIQUE NONCLUSTERED ([email] ASC) WHERE [email] IS NOT NULL,
     CONSTRAINT [CK_Usuario_Rol] CHECK ([rol] IN ('Especialista', 'Asistente'))
 ) ON [PRIMARY];
 GO
@@ -125,6 +133,18 @@ GO
 -- =========================================================================================
 -- ÍNDICES DE RENDIMIENTO (Performance Optimization)
 -- =========================================================================================
+CREATE NONCLUSTERED INDEX [IX_Usuario_Rol]
+    ON [dbo].[Usuario]([rol] ASC);
+GO
+
+CREATE NONCLUSTERED INDEX [IX_Usuario_EsAdmin]
+    ON [dbo].[Usuario]([es_admin] ASC);
+GO
+
+CREATE NONCLUSTERED INDEX [IX_Usuario_Activo]
+    ON [dbo].[Usuario]([activo] ASC);
+GO
+
 CREATE NONCLUSTERED INDEX [IX_SignoClinico_Categoria] 
     ON [dbo].[SignoClinico]([id_categoria] ASC);
 GO
@@ -149,18 +169,18 @@ GO
 --    - dr_admin: Doctor Especialista con Credencial de Administrador
 --    - asistente_admin: Asistente Clínico con Credencial de Administrador
 --    - asistente_01: Asistente Clínico Estándar (Sin privilegios de gestión de usuarios)
-INSERT INTO [dbo].[Usuario] ([nombre_usuario], [password_hash], [rol]) 
+INSERT INTO [dbo].[Usuario] ([nombre_usuario], [password_hash], [rol], [es_admin], [nombre_completo], [email], [activo])
 VALUES 
-('dr_admin', 'hash_simulado_aqui_123', 'Especialista'),
-('asistente_admin', 'hash_simulado_asistente_admin', 'Asistente'),
-('asistente_01', 'hash_simulado_aqui_456', 'Asistente');
+('dr_admin', 'hash_simulado_aqui_123', 'Especialista', 1, 'Dr. Roberto Admin', 'dr.admin@clinica.cl', 1),
+('asistente_admin', 'hash_simulado_asistente_admin', 'Asistente', 1, 'Asistente Jefe Admin', 'asistente.admin@clinica.cl', 1),
+('asistente_01', 'hash_simulado_aqui_456', 'Asistente', 0, 'Asistente Clínico 01', 'asistente01@clinica.cl', 1);
 GO
 
--- 2. Pacientes (RUTs verificados algorítmicamente mediante Módulo 11):
+-- 2. Pacientes (datos completamente ficticios para demostración):
 INSERT INTO [dbo].[Paciente] ([rut], [nombre], [apellidos], [fecha_nacimiento], [telefono]) 
 VALUES 
-('11222333-4', 'Carlos', 'Méndez Rojas', '1985-05-14', '+56912345678'),
-('22333444-5', 'Ana', 'Silva Pérez', '1992-11-30', '+56987654321');
+('00000000-0', 'Paciente', 'Demo 001', '1990-01-01', NULL),
+('00000001-9', 'Paciente', 'Demo 002', '1990-01-01', NULL);
 GO
 
 -- 3. Categorías de Examen Clínico:
@@ -181,8 +201,8 @@ GO
 -- 5. Evaluaciones Clínicas Iniciales:
 INSERT INTO [dbo].[Evaluacion] ([fecha_evaluacion], [observaciones], [resultado], [id_paciente], [id_usuario], [id_signo]) 
 VALUES 
-('2026-08-15T10:30:00', 'Paciente presenta marcha inestable y dificultad para tocar la nariz con el dedo.', 'Ataxia Positiva', 1, 1, 1),
-('2026-08-20T15:45:00', 'Paciente requiere usar sus manos y brazos para "escalar" sobre su propio cuerpo al levantarse.', 'Signo de Gowers Presente', 2, 1, 2);
+('2026-08-15T10:30:00', 'Registro ficticio de demostración; no representa un caso clínico real.', 'Resultado demostrativo', 1, 1, 1),
+('2026-08-20T15:45:00', 'Registro ficticio de demostración; no representa un caso clínico real.', 'Resultado demostrativo', 2, 1, 2);
 GO
 
 -- =========================================================================================

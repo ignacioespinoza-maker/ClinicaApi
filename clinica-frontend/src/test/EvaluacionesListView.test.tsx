@@ -13,10 +13,10 @@ const mockEvaluaciones: Evaluacion[] = [
     idEvaluacion: 1,
     fechaEvaluacion: '2026-08-15T10:30:00',
     resultado: 'Ataxia Positiva',
-    observaciones: 'Marcha inestable y dificultad al coordinar.',
+    observaciones: 'Registro ficticio de demostración.',
     idPaciente: 1,
-    pacienteNombre: 'Carlos Méndez Rojas',
-    pacienteRut: '11222333-4',
+    pacienteNombre: 'Paciente Demo 001',
+    pacienteRut: '00000000-0',
     idSigno: 1,
     signoNombre: 'Prueba de Ataxia',
     idUsuario: 1,
@@ -26,10 +26,10 @@ const mockEvaluaciones: Evaluacion[] = [
     idEvaluacion: 2,
     fechaEvaluacion: '2026-08-20T15:45:00',
     resultado: 'Signo de Gowers Presente',
-    observaciones: 'Paciente requiere escalar sobre su propio cuerpo.',
+    observaciones: 'Registro ficticio de demostración.',
     idPaciente: 2,
-    pacienteNombre: 'Ana Silva Pérez',
-    pacienteRut: '22333444-5',
+    pacienteNombre: 'Paciente Demo 002',
+    pacienteRut: '00000001-9',
     idSigno: 2,
     signoNombre: 'Signo de Gowers',
     idUsuario: 1,
@@ -60,11 +60,11 @@ describe('EvaluacionesListView Component Tests (CRUD)', () => {
       </MemoryRouter>
     );
 
-    const carlosElements = await screen.findAllByText('Carlos Méndez Rojas');
-    expect(carlosElements.length).toBeGreaterThan(0);
+    const demoOneElements = await screen.findAllByText('Paciente Demo 001');
+    expect(demoOneElements.length).toBeGreaterThan(0);
 
-    const anaElements = screen.getAllByText('Ana Silva Pérez');
-    expect(anaElements.length).toBeGreaterThan(0);
+    const demoTwoElements = screen.getAllByText('Paciente Demo 002');
+    expect(demoTwoElements.length).toBeGreaterThan(0);
 
     const ataxiaElements = screen.getAllByText('Ataxia Positiva');
     expect(ataxiaElements.length).toBeGreaterThan(0);
@@ -81,13 +81,13 @@ describe('EvaluacionesListView Component Tests (CRUD)', () => {
       </MemoryRouter>
     );
 
-    await screen.findAllByText('Carlos Méndez Rojas');
+    await screen.findAllByText('Paciente Demo 001');
 
     const searchInput = screen.getByPlaceholderText(/buscar por paciente/i);
-    await user.type(searchInput, 'Ana');
+    await user.type(searchInput, 'Demo 002');
 
-    expect(screen.getAllByText('Ana Silva Pérez').length).toBeGreaterThan(0);
-    expect(screen.queryByText('Carlos Méndez Rojas')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Paciente Demo 002').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Paciente Demo 001')).not.toBeInTheDocument();
   });
 
   it('abre el diálogo de confirmación accesible al pulsar eliminar y procesa el borrado', async () => {
@@ -102,7 +102,7 @@ describe('EvaluacionesListView Component Tests (CRUD)', () => {
       </MemoryRouter>
     );
 
-    await screen.findAllByText('Carlos Méndez Rojas');
+    await screen.findAllByText('Paciente Demo 001');
 
     // Pulsar botón de eliminar de la primera evaluación
     const deleteButtons = screen.getAllByLabelText(/eliminar evaluación #1/i);

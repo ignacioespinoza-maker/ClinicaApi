@@ -77,8 +77,8 @@ GO
 
 INSERT INTO [dbo].[Paciente] ([rut], [nombre], [apellidos], [fecha_nacimiento], [telefono]) 
 VALUES 
-('11222333-4', 'Carlos', 'Méndez Rojas', '19850514', '+56912345678'),
-('22333444-5', 'Ana', 'Silva Pérez', '19921130', '+56987654321');
+('00000000-0', 'Paciente', 'Demo 001', '19900101', NULL),
+('00000001-9', 'Paciente', 'Demo 002', '19900101', NULL);
 GO
 
 INSERT INTO [dbo].[CategoriaExamen] ([nombre], [descripcion]) 
@@ -96,7 +96,6 @@ GO
 
 INSERT INTO [dbo].[Evaluacion] ([fecha_evaluacion], [observaciones], [resultado], [id_paciente], [id_usuario], [id_signo]) 
 VALUES 
-('2026-08-15T10:30:00', 'Paciente presenta marcha inestable y dificultad para tocar la nariz con el dedo.', 'Ataxia Positiva', 1, 1, 1),
-('2026-08-20T15:45:00', 'Paciente requiere usar sus manos y brazos para "escalar" sobre su propio cuerpo al levantarse.', 'Signo de Gowers Presente', 2, 1, 2);
+('2026-08-15T10:30:00', 'Registro ficticio de demostración; no representa un caso clínico real.', 'Resultado demostrativo', 1, 1, 1),
+('2026-08-20T15:45:00', 'Registro ficticio de demostración; no representa un caso clínico real.', 'Resultado demostrativo', 2, 1, 2);
 GO
-

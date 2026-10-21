@@ -35,11 +35,16 @@ namespace ClinicaApi.Services
 
             if (!isValid) return null;
 
-            // 2. Configurar la llave de seguridad (Truco para aceptar llaves cortas)
-            string rawKey = _config["Jwt:Key"] ?? "ClaveSecretaClinicaSuperSegura20261013ParaEvaluacionUT2";
-            string validKey = rawKey.PadRight(32, '0'); // Rellena con ceros hasta alcanzar el tamaño requerido
+            // 2. Configurar la llave de seguridad
+            string rawKey = _config["Jwt:Key"]
+                ?? throw new InvalidOperationException("Falta configurar Jwt:Key mediante User Secrets o una variable de entorno.");
+            byte[] keyBytes = Encoding.UTF8.GetBytes(rawKey);
+            if (keyBytes.Length < 32)
+            {
+                throw new InvalidOperationException("Jwt:Key debe tener al menos 32 bytes.");
+            }
 
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(validKey));
+            var securityKey = new SymmetricSecurityKey(keyBytes);
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             // 3. Crear los "Claims" (Datos dentro del token)

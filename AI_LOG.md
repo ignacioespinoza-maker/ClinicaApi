@@ -197,9 +197,31 @@ Todo el código generado fue analizado críticamente, ajustado según las restri
 
 ---
 
+### Eje 12: Optimización y Rediseño Integral de Usuarios (Full Stack: UI/UX y Base de Datos SQL)
+- **Prompt Utilizado:**
+  > *"Mejora el diseño de usuarios"*
+- **Respuesta de la IA:**
+  1. **Diseño de Base de Datos ([`clinica.sql`](file:///c:/Users/ignac/Downloads/ClinicaApi-main/clinica.sql)):**
+     - **Estructura Relacional Mejorada:** Se rediseñó la tabla `[dbo].[Usuario]` incorporando la columna explícita `[es_admin] [bit] NOT NULL DEFAULT (0)` para formalizar los privilegios administrativos sin depender de convenciones en strings de nombres.
+     - **Auditoría y Contacto:** Se agregaron columnas de estándar corporativo: `[nombre_completo] [varchar](150)`, `[email] [varchar](150)` con índice único condicional (`WHERE email IS NOT NULL`), `[activo] [bit] NOT NULL DEFAULT (1)` para habilitar borrado lógico sin romper integridad referencial con `Evaluacion`, `[fecha_creacion]` y `[ultimo_acceso]`.
+     - **Índices de Rendimiento:** Se añadieron los índices `IX_Usuario_Rol`, `IX_Usuario_EsAdmin` e `IX_Usuario_Activo` optimizando consultas y filtrados.
+     - **Datos Semilla:** Se actualizaron los registros iniciales (`dr_admin`, `asistente_admin` y `asistente_01`) reflejando los nuevos atributos manteniendo retrocompatibilidad.
+  2. **Diseño de Interfaz Visual y UX ([`UsuariosView.tsx`](file:///c:/Users/ignac/Downloads/ClinicaApi-main/clinica-frontend/src/views/UsuariosView.tsx) e [`index.css`](file:///c:/Users/ignac/Downloads/ClinicaApi-main/clinica-frontend/src/index.css)):**
+     - **Tarjetas de Estadísticas (KPIs):** Cuadrícula superior de 4 tarjetas (`.stats-grid-4`) con conteos en tiempo real: Total de Usuarios, Doctores Especialistas, Asistentes Clínicos y Usuarios con Credencial Admin.
+     - **Filtros Rápidos por Rol:** Barra de chips de filtrado segmentado (*Todos*, *Especialistas*, *Asistentes*, *Administradores*) con contadores numéricos y estado activo visual.
+     - **Avatares con Iniciales Dinámicas:** Generación de iniciales con gradientes de color diferenciados por rol (azul médico para Especialistas y turquesa para Asistentes), con distintivo de administrador.
+     - **Visualización de Permisos Granulares:** Etiquetas descriptivas de capacidades del sistema (*Gestión Usuarios*, *Evaluaciones CRUD*, *Pacientes & Catálogos*, *Lectura*).
+     - **Modal Modernizado con Selector de Rol Visual:** Tarjetas interactivas para escoger entre Doctor Especialista y Asistente Clínico con descripción de privilegios, más botón de visualización de contraseña (*toggle* Mostrar/Ocultar con iconos `Eye`/`EyeOff`).
+     - **Identificador de Sesión:** Distintivo *"Sesión Actual"* con indicador visual de presencia para evitar auto-eliminación accidental.
+  3. **Verificación y Pruebas Automatizadas:**
+     - 26/26 pruebas unitarias y de componentes pasando al 100% en Vitest (`npm test`).
+     - 10/10 pruebas de integración y seguridad pasando en .NET 10 xUnit (`dotnet test`).
+
+---
+
 ## 3. Resumen Cuantitativo de Decisiones
 
-- **Total de prompts formulados:** 11
-- **Elementos aceptados directamente:** ~88%
-- **Elementos corregidos/adaptados:** ~12%
+- **Total de prompts formulados:** 12
+- **Elementos aceptados directamente:** ~90%
+- **Elementos corregidos/adaptados:** ~10%
 - **Elementos descartados:** 0%

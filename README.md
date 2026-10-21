@@ -27,7 +27,7 @@ ClinicaApi_repo/
 │   ├── Models/                    # Entidades y DbContext de Entity Framework Core
 │   ├── Repositories/              # Patrón Repository (IEvaluacionRepository)
 │   ├── Services/                  # Servicios de autenticación y lógica de negocio
-│   ├── appsettings.json           # Configuración de base de datos y llaves JWT
+│   ├── appsettings.json           # Configuración pública; la clave JWT se configura localmente
 │   └── .env.example               # Variables de entorno de referencia para el backend
 ├── ClinicaApi.Tests/              # Suite de Pruebas de Integración y Seguridad del Backend (xUnit)
 │   └── SeguridadTests.cs          # Tests de 401, 403, CORS, Cabeceras y CRUD en API
@@ -89,9 +89,9 @@ ClinicaApi_repo/
    ```bash
    cd ClinicaApi
    ```
-2. Revisa o copia el archivo de variables:
+2. Configura una clave JWT local (mínimo 32 bytes; no la publiques):
    ```bash
-   copy .env.example .env
+   dotnet user-secrets set "Jwt:Key" "<clave aleatoria de al menos 32 bytes>"
    ```
 3. Inicia la API:
    ```bash
@@ -101,6 +101,9 @@ ClinicaApi_repo/
    - **HTTPS:** `https://localhost:7217`
    - **HTTP:** `http://localhost:5103`
    - **Documentación Interactiva (Scalar):** `https://localhost:7217/scalar/v1`
+
+El valor de `Jwt:Key` no se guarda en Git. También puede suministrarse mediante la variable de entorno `Jwt__Key`.
+Los registros SQL incluidos son datos ficticios de demostración y no representan pacientes reales.
 
 ### Paso 3: Ejecutar el Frontend (React + Vite)
 1. En una nueva terminal, navega al directorio del frontend:
